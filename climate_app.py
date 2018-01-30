@@ -1,5 +1,5 @@
 ###########################################
-# Import Dependencies
+# imports dependencies
 ###########################################
 
 import datetime as dt
@@ -14,14 +14,17 @@ from sqlalchemy import create_engine, func
 from flask import Flask, jsonify
 
 ###########################################
-# Setup Database
+# initializes database
 ###########################################
 
 engine = create_engine("sqlite:///hawaii.sqlite")
 Base = automap_base()
 Base.prepare(engine, reflect=True)
 
-#Create references to Measurement and Station tables
+###########################################
+# creates references to Measurement
+# and Station tables
+###########################################
 
 Measurement = Base.classes.measurement
 Station = Base.classes.station
@@ -29,45 +32,45 @@ Station = Base.classes.station
 session = Session(engine)
 
 ####################################
-# Setup Flask app
+# initializes Flask app
 ####################################
 app = Flask(__name__)
 
 ################################
-# Setup Flask Routes
+# initializes Flask Routes
 ################################
 
 @app.route("/")
 def homepage():
     """List of all returnable API routes."""
     return(
-        f"Available Routes:<br/>"
-        f"(Note: Dates range from 2010-01-01 to 2017-08-23).<br/>"
+        f"(Note: Dates range from 2010-01-01 to 2017-08-23). <br><br>"
+        f"Available Routes: <br>"
 
         f"/api/v1.0/precipitation<br/>"
-        f"- Query dates and temperature from the last year. <br/>"
+        f"Returns dates and temperature from the last year. <br><br>"
 
         f"/api/v1.0/stations<br/>"
-        f"- Returns a json list of stations. <br/>"
+        f"Returns a json list of stations. <br><br>"
 
         f"/api/v1.0/tobs<br/>"
-        f"- Returns list of Temperature Observations(tobs) for previous year. <br/>"
+        f"Returns list of Temperature Observations(tobs) for previous year. <br><br>"
 
         f"/api/v1.0/yyyy-mm-dd/<br/>"
-        f"- Returns an Average, Max, and Min temperature for given date.<br/>"
+        f"Returns an Average, Max, and Min temperatures for a given start date.<br><br>"
 
         f"/api/v1.0/yyyy-mm-dd/yyyy-mm-dd/<br/>"
-        f"- Returns an Aveage Max, and Min temperature for given period.<br/>"
+        f"Returns an Average, Max, and Min temperatures for a given date range."
     )
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     """Return Dates and Temp from the last year."""
     results = session.query(Measurement.date, Measurement.tobs).\
-        filter(Measurement.date >= "2017-01-01", Measurement.date <= "2017-12-31").\
+        filter(Measurement.date >= "2016-08-24", Measurement.date <= "2017-08-23").\
         all()
 
-    #create the JSON objects
+    # creates JSONified list
     precipitation_list = [results]
 
     return jsonify(precipitation_list)
@@ -77,7 +80,7 @@ def stations():
     """Return a list of stations"""
     results = session.query(Station.name, Station.station, Station.elevation).all()
 
-    #create dictionary for JSON
+    # creates JSONified list of dictionaries
     station_list = []
     for result in results:
         row = {}
@@ -91,15 +94,15 @@ def stations():
 def temp_obs():
     """Return a list of tobs for the previous year"""
     results = session.query(Station.name, Measurement.date, Measurement.tobs).\
-        filter(Measurement.date >= "2017-01-01", Measurement.date <= "2017-12-31").\
+        filter(Measurement.date >= "2016-08-24", Measurement.date <= "2017-08-23").\
         all()
 
-    #create json, perhaps use dictionary
+    # creates JSONified list of dictionaries
     tobs_list = []
     for result in results:
         row = {}
-        row["Date"] = result[1]
         row["Station"] = result[0]
+        row["Date"] = result[1]
         row["Temperature"] = int(result[2])
         tobs_list.append(row)
 
@@ -108,17 +111,18 @@ def temp_obs():
 @app.route('/api/v1.0/<date>/')
 def given_date(date):
     """Return the average temp, max temp, and min temp for the date"""
-    results = session.query(Measurement.date, func.avg(Measurement.tobs), func.max(Measurement.tobs), func.min(Measurement.tobs)).\
-        filter(Measurement.date == date).all()
+    results = session.query(func.avg(Measurement.tobs), func.max(Measurement.tobs), func.min(Measurement.tobs)).\
+        filter(Measurement.date >= date).all()
 
-#Create JSON
+    # creates JSONified list of dictionaries
     data_list = []
     for result in results:
         row = {}
-        row['Date'] = result[0]
-        row['Average Temperature'] = float(result[1])
-        row['Highest Temperature'] = float(result[2])
-        row['Lowest Temperature'] = float(result[3])
+        row['Start Date'] = date
+        row['End Date'] = '2017-08-23'
+        row['Average Temperature'] = float(result[0])
+        row['Highest Temperature'] = float(result[1])
+        row['Lowest Temperature'] = float(result[2])
         data_list.append(row)
 
     return jsonify(data_list)
@@ -129,6 +133,7 @@ def query_dates(start_date, end_date):
     results = session.query(func.avg(Measurement.tobs), func.max(Measurement.tobs), func.min(Measurement.tobs)).\
         filter(Measurement.date >= start_date, Measurement.date <= end_date).all()
 
+    # creates JSONified list of dictionaries
     data_list = []
     for result in results:
         row = {}
