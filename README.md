@@ -1,5 +1,5 @@
 <!--lint disable no-heading-punctuation-->
-# Surfs Up!
+# Scenario: Surfs Up!
 <!--lint enable no-heading-punctuation-->
 
 <img src='images/surfs-up.jpeg' />
@@ -105,7 +105,7 @@ You are now ready to use Python and SQLAlchemy to do basic climate analysis and 
 
 * The following are optional challenge queries. These are highly recommended to attempt, but not required for the homework.
 
-  * Calcualte the rainfall per weather station using the previous year's matching dates.
+  * Calculate the rainfall per weather station using the previous year's matching dates.
 
 * Calculate the daily normals. Normals are the averages for min, avg, and max temperatures.
 
@@ -158,7 +158,3 @@ Now that you have completed your initial analysis, design a Flask api based on t
 * You will need to join the station and measurement tables for some of the analysis queries.
 
 * Use Flask `jsonify` to convert your api data into a valid json response object.
-
-## Copyright
-
-Coding Boot Camp © 2017. All Rights Reserved.
